@@ -149,5 +149,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2566aa2f81d045e4388ab05ccd12d6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupSfx: {fileID: 0}
+  pickupSfx: {fileID: 8300000, guid: 57ca24b98d26709419c20e5ffc01ec29, type: 3}
+  sfxVolume: 0.8
   destroyDelay: 0.02

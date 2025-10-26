@@ -4,6 +4,7 @@ using UnityEngine;
 public class CoinPickup : MonoBehaviour
 {
     [SerializeField] AudioClip pickupSfx;
+    [SerializeField] float sfxVolume = 0.8f;
     [SerializeField] float destroyDelay = 0.02f;
 
     Collider2D col;
@@ -12,7 +13,7 @@ public class CoinPickup : MonoBehaviour
     void Awake()
     {
         col = GetComponent<Collider2D>(); col.isTrigger = true;
-        sr = GetComponent<SpriteRenderer>(); if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
+        sr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -25,7 +26,10 @@ public class CoinPickup : MonoBehaviour
         col.enabled = false;
 
         if (pickupSfx)
-            AudioSource.PlayClipAtPoint(pickupSfx, transform.position, 0.8f);
+        {
+            var cam = Camera.main;
+            AudioSource.PlayClipAtPoint(pickupSfx, cam ? cam.transform.position : transform.position, sfxVolume);
+        }
 
         Destroy(gameObject, destroyDelay);
     }

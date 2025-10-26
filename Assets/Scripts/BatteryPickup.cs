@@ -3,19 +3,18 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class BatteryPickup : MonoBehaviour
 {
-    [Range(0f, 1f)]
-    [SerializeField] float rechargeAmount = 0.5f; // 0..1 = 0..100% battery
-    [SerializeField] AudioClip pickupSfx;         // optional
-    [SerializeField] float destroyDelay = 0.05f;  // small delay to let SFX play
+    [Range(0f, 1f)][SerializeField] float rechargeAmount = 0.5f;
+    [SerializeField] AudioClip pickupSfx;
+    [SerializeField] float sfxVolume = 0.8f;
+    [SerializeField] float destroyDelay = 0.05f;
+
     Collider2D col;
     SpriteRenderer sr;
 
     void Awake()
     {
-        col = GetComponent<Collider2D>();
-        col.isTrigger = true;
-        sr = GetComponent<SpriteRenderer>();
-        if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
+        col = GetComponent<Collider2D>(); col.isTrigger = true;
+        sr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -23,14 +22,16 @@ public class BatteryPickup : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         var lantern = FindObjectOfType<LanternMaskController>();
-        if (lantern != null) lantern.Recharge(rechargeAmount);
+        if (lantern) lantern.Recharge(rechargeAmount);
 
-        // basic feedback: hide & play sound
         if (sr) sr.enabled = false;
         col.enabled = false;
 
         if (pickupSfx)
-            AudioSource.PlayClipAtPoint(pickupSfx, transform.position, 0.8f);
+        {
+            var cam = Camera.main;
+            AudioSource.PlayClipAtPoint(pickupSfx, cam ? cam.transform.position : transform.position, sfxVolume);
+        }
 
         Destroy(gameObject, destroyDelay);
     }
