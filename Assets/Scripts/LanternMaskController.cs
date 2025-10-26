@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class LanternMaskController : MonoBehaviour
 {
@@ -19,8 +20,14 @@ public class LanternMaskController : MonoBehaviour
     [SerializeField] float flickerSpeed = 8f;
     [SerializeField] float maxFlickerShrink = 0.05f;
 
+    [Header("Depletion Behavior")]
+    [SerializeField] bool killOnEmpty = true;
+    [SerializeField] float deathFadeTime = 0.35f; // small dramatic fade
+
     float energy;
     Material mat;
+    bool depletedFired = false;
+
 
     void Awake()
     {
@@ -28,6 +35,8 @@ public class LanternMaskController : MonoBehaviour
         mat = Instantiate(darkMaskImage.material);
         darkMaskImage.material = mat;
         energy = maxEnergy;
+        depletedFired = false;
+
     }
 
     void Update()
@@ -58,9 +67,46 @@ public class LanternMaskController : MonoBehaviour
         mat.SetFloat("_Radius", radius);
         mat.SetFloat("_Feather", 0.18f);
 
-        // optional: handle total blackout later (game over)
-        // if (energy <= 0f) {...}
+        if (killOnEmpty && !depletedFired && energy <= 0f)
+        {
+            depletedFired = true;
+            StartCoroutine(DoLanternDeath()); // fade & reset run
+        }
     }
+
+    IEnumerator DoLanternDeath()
+    {
+        // Fade in overlay (if present). Uses your deathFadeTime for nice pacing.
+        if (DeathOverlay.I != null)
+        {
+            yield return DeathOverlay.I.FadeInAndHold(deathFadeTime, 1.5f, "");
+        }
+        else
+        {
+            // Fallback: quick tighten of the light if overlay missing
+            float t = 0f;
+            float startRadius = mat.GetFloat("_Radius");
+            while (t < deathFadeTime)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / deathFadeTime);
+                mat.SetFloat("_Radius", Mathf.Lerp(startRadius, minRadius * 0.5f, k));
+                yield return null;
+            }
+        }
+
+        // Wipe remaining lives and reset the run
+        if (GameManager.I != null)
+        {
+            GameManager.I.lives = 0;
+            GameManager.I.LoseLife();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager not found; cannot reset after lantern death.");
+        }
+    }
+
 
     public void Recharge(float amount)   // amount in 0..1
     {
@@ -70,5 +116,7 @@ public class LanternMaskController : MonoBehaviour
     public void RestoreOnRespawn()
     {
         energy = Mathf.Max(energy, 0.5f);
+        depletedFired = false; // allow future depletion
+
     }
 }

@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
     public int levelIndex = 1;     // shown on HUD
     public int coins = 0;          // total run coins
     public int coinsThisLevel = 0; // coins picked in current level
+    public int lives = 3;          // number of lives
+    public int maxLives = 3;       
 
     void Awake()
     {
@@ -23,6 +25,37 @@ public class GameManager : MonoBehaviour
         coinsThisLevel += amount;
         UIHud.I?.Refresh();
     }
+    public void LoseLife()
+    {
+        lives--;
+        UIHud.I?.Refresh();
+
+        if (lives <= 0)
+        {
+            // restart whole run
+            lives = maxLives;
+            coins = 0;
+            levelIndex = 1;
+            coinsThisLevel = 0;
+            SceneManager.LoadScene("Level_01");
+        }
+        else
+        {
+            var player = FindObjectOfType<PlayerController2D>();
+            if (player)
+            {
+                player.Respawn(); 
+            }
+        }
+
+    }
+
+    public void GainLife(int amount = 1)
+    {
+        lives = Mathf.Min(maxLives, lives + amount);
+        UIHud.I?.Refresh();
+    }
+
 
     public void EnterNextLevel(string nextScene)
     {

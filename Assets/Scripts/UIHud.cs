@@ -7,6 +7,8 @@ public class UIHud : MonoBehaviour
 
     [SerializeField] TMP_Text coinsText;
     [SerializeField] TMP_Text levelText;
+    [SerializeField] TMP_Text livesText;   
+
 
     void Awake()
     {
@@ -19,5 +21,7 @@ public class UIHud : MonoBehaviour
         if (GameManager.I == null) return;
         if (coinsText) coinsText.text = $"Coins: {GameManager.I.coins}";
         if (levelText) levelText.text = $"Level {GameManager.I.levelIndex}";
+        if (livesText) livesText.text = $"Lives: {GameManager.I.lives}";
+
     }
 }
