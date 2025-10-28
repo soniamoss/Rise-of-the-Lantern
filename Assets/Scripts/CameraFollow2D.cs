@@ -43,10 +43,8 @@ public class CameraFollow2D : MonoBehaviour
     {
         if (!target) return;
 
-        // If you change camera size/aspect at runtime, keep extents fresh
         RecalcHalfExtents();
 
-        // Horizontal look-ahead based on move direction
         float dir = Mathf.Sign(target.position.x - lastTargetX);
         float ahead = Mathf.Abs(target.position.x - lastTargetX) > 0.001f ? dir * lookAheadX : 0f;
         lastTargetX = target.position.x;
@@ -75,7 +73,6 @@ public class CameraFollow2D : MonoBehaviour
 
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
 
-        // Optional vertical clamps if you have top/bottom bound objects
         if (bottomBound || topBound)
         {
             float minY = bottomBound ? bottomBound.position.y + halfHeight : float.NegativeInfinity;
